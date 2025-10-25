@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+
 import { createClient } from "@supabase/supabase-js";
 import {
   BrowserRouter as Router,
@@ -60,7 +61,7 @@ export default function App() {
 function Topbar({ cartCount, isAdminPage, customerName }) {
   return (
     <div className="bg-gradient-to-r from-blue-600 to-blue-700 border-b-2 border-blue-800 sticky top-0 z-50 shadow-lg w-full">
-      <div className="flex items-center justify-between w-full px-4 sm:px-6 lg:px-8 py-4">
+      <div className="flex items-center justify-between w-full px-4 sm:px-6 lg:px-8 py-4 max-w-none">
         {isAdminPage ? (
           <>
             {/* Left: Logout */}
@@ -203,6 +204,10 @@ function Home() {
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         {!customer ? (
           <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold text-gray-800 mb-4">Welcome to Sri Srinivasa Marketing</h1>
+              <p className="text-lg text-gray-600">Please enter your details to browse our catalog</p>
+            </div>
             <CustomerForm onSave={handleSetCustomer} />
           </div>
         ) : (
@@ -230,7 +235,7 @@ function Home() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 lg:gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 lg:gap-6">
             {catalog.map((item) => (
               <ItemCardCustomer
                 key={item.id}
@@ -253,7 +258,7 @@ function CustomerForm({ onSave }) {
   const [number, setNumber] = useState("");
   return (
     <div className="bg-white border border-gray-200 p-8 rounded-2xl shadow-lg mb-8">
-      <h3 className="font-bold text-2xl mb-6 text-gray-800 text-center">Enter your details</h3>
+      <h3 className="font-bold text-2xl mb-6 text-gray-800 text-center">Enter your details to continue</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input
           value={name}
@@ -283,7 +288,7 @@ function CustomerForm({ onSave }) {
 
 function ItemCardCustomer({ item, quantity, onAdd, onRemove, onSetQuantity }) {
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-300 flex flex-col h-full min-h-[400px]">
+    <div className="bg-white rounded-2xl shadow-lg p-4 border border-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-300 flex flex-col h-full min-h-[350px]">
       <div className="h-48 flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 mb-4">
         {item.image ? (
           <img
@@ -576,11 +581,11 @@ function AdminDashboard() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 lg:gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 lg:gap-6">
             {catalog.map((item) => (
               <div
                 key={item.id}
-                className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-300 flex flex-col h-full min-h-[400px]"
+                className="bg-white rounded-2xl shadow-lg p-4 border border-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-300 flex flex-col h-full min-h-[350px]"
               >
                 <div className="h-48 flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 mb-4">
                   {item.image ? (
