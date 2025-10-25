@@ -148,7 +148,7 @@ function Topbar({ cartCount, isAdminPage }: { cartCount: number; isAdminPage: bo
       {/* Customer contact info - centered under shop name */}
       {!isAdminPage && (
         <div className="text-center text-sm text-white/90 pb-3 border-t border-white/20 pt-2 bg-blue-800/20">
-          Contact us: 1234567890, 0987654321, 1122334455
+          Contact us: Srinivas: 9246586922, Santosh: 9866478802, Office: 7702293589
         </div>
       )}
     </div>
