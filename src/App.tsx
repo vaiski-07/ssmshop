@@ -79,7 +79,7 @@ function Topbar({ cartCount, isAdminPage, customerName }) {
             <div className="flex-1 flex justify-center">
               <Link
                 to="/"
-                className="text-2xl sm:text-3xl font-bold text-white hover:text-blue-100 transition-all duration-200"
+                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white hover:text-white transition-all duration-200 no-underline"
               >
                 Sri Srinivasa Marketing
               </Link>
@@ -107,7 +107,7 @@ function Topbar({ cartCount, isAdminPage, customerName }) {
             <div className="flex-1 flex justify-center">
               <Link
                 to="/"
-                className="text-2xl sm:text-3xl font-bold text-white hover:text-blue-100 transition-all duration-200"
+                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white hover:text-white transition-all duration-200 no-underline"
               >
                 Sri Srinivasa Marketing
               </Link>
@@ -235,7 +235,7 @@ function Home() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 lg:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-6 lg:gap-8">
             {catalog.map((item) => (
               <ItemCardCustomer
                 key={item.id}
@@ -581,7 +581,7 @@ function AdminDashboard() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 lg:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-6 lg:gap-8">
             {catalog.map((item) => (
               <div
                 key={item.id}
