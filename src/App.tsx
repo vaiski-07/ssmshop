@@ -70,7 +70,7 @@ function Topbar({ cartCount, isAdminPage, customerName }) {
                 localStorage.removeItem("is_admin");
                 window.location.href = "/admin/login";
               }}
-              className="px-4 py-2 bg-white/20 text-white border border-white/30 rounded-lg hover:bg-white/30 transition-all duration-200 font-medium"
+              className="px-6 py-3 bg-white/20 text-white border border-white/30 rounded-lg hover:bg-white/30 transition-all duration-200 font-medium text-lg"
             >
               Logout
             </button>
@@ -79,7 +79,7 @@ function Topbar({ cartCount, isAdminPage, customerName }) {
             <div className="flex-1 flex justify-center">
               <Link
                 to="/"
-                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white hover:text-white transition-all duration-200 no-underline"
+                className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-bold text-white hover:text-white transition-all duration-200 no-underline"
               >
                 Sri Srinivasa Marketing
               </Link>
@@ -88,7 +88,7 @@ function Topbar({ cartCount, isAdminPage, customerName }) {
             {/* Right: Add Item button */}
             <button
               onClick={() => window.dispatchEvent(new Event("openAddItem"))}
-              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-200 font-medium shadow-md"
+              className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-200 font-medium text-lg shadow-md"
             >
               Add Item
             </button>
@@ -98,7 +98,7 @@ function Topbar({ cartCount, isAdminPage, customerName }) {
             {/* Left: Admin */}
             <Link
               to="/admin/login"
-              className="text-sm text-white/90 hover:text-white font-medium transition-all duration-200 px-3 py-2 rounded-lg hover:bg-white/10"
+              className="text-lg text-white/90 hover:text-white font-medium transition-all duration-200 px-4 py-3 rounded-lg hover:bg-white/10"
             >
               Admin
             </Link>
@@ -107,7 +107,7 @@ function Topbar({ cartCount, isAdminPage, customerName }) {
             <div className="flex-1 flex justify-center">
               <Link
                 to="/"
-                className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white hover:text-white transition-all duration-200 no-underline"
+                className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-bold text-white hover:text-white transition-all duration-200 no-underline"
               >
                 Sri Srinivasa Marketing
               </Link>
@@ -116,10 +116,10 @@ function Topbar({ cartCount, isAdminPage, customerName }) {
             {/* Right: Cart */}
             <Link
               to="/cart"
-              className="relative inline-flex items-center px-4 py-2 bg-white text-blue-600 rounded-full hover:bg-blue-50 transition-all duration-200 font-medium shadow-md"
+              className="relative inline-flex items-center px-6 py-3 bg-white text-gray-800 rounded-full hover:bg-gray-50 transition-all duration-200 font-medium text-lg shadow-md"
             >
               Cart
-              <span className="ml-2 bg-blue-600 text-white font-semibold text-xs px-2 py-0.5 rounded-full">
+              <span className="ml-2 bg-blue-600 text-white font-semibold text-sm px-3 py-1 rounded-full">
                 {cartCount}
               </span>
             </Link>
@@ -235,7 +235,7 @@ function Home() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-6 lg:gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-8 lg:gap-12">
             {catalog.map((item) => (
               <ItemCardCustomer
                 key={item.id}
@@ -288,7 +288,7 @@ function CustomerForm({ onSave }) {
 
 function ItemCardCustomer({ item, quantity, onAdd, onRemove, onSetQuantity }) {
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-4 border border-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-300 flex flex-col h-full min-h-[350px]">
+    <div className="bg-white rounded-2xl shadow-lg p-4 border border-gray-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full min-h-[350px]">
       <div className="h-48 flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 mb-4">
         {item.image ? (
           <img
@@ -513,13 +513,18 @@ function AdminDashboard() {
   const [catalog, setCatalog] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
+  const [showEdit, setShowEdit] = useState(null);
 
   useEffect(() => {
     const isAdmin = localStorage.getItem("is_admin");
     if (!isAdmin) navigate("/admin/login");
     fetchCatalog();
 
-    const handleOpenAdd = () => setShowAdd(true);
+    const handleOpenAdd = () => {
+      setShowAdd(true);
+      // Scroll to top when modal opens
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
     window.addEventListener("openAddItem", handleOpenAdd);
     return () => window.removeEventListener("openAddItem", handleOpenAdd);
   }, []);
@@ -559,12 +564,41 @@ function AdminDashboard() {
     setShowAdd(false);
   }
 
+  async function updateItem(id, payload) {
+    const { data, error } = await supabase
+      .from("items")
+      .update(payload)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) {
+      alert("Update failed");
+      return;
+    }
+    setCatalog((prev) => prev.map((item) => (item.id === id ? data : item)));
+    setShowEdit(null);
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 w-full">
       <Topbar cartCount={0} isAdminPage={true} customerName={undefined} />
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Admin - Catalog Management</h2>
+        {showAdd && (
+          <div className="mb-8">
+            <AddItemModal onClose={() => setShowAdd(false)} onSave={addItem} />
+          </div>
+        )}
 
+        {showEdit && (
+          <div className="mb-8">
+            <EditItemModal 
+              item={showEdit} 
+              onClose={() => setShowEdit(null)} 
+              onSave={(payload) => updateItem(showEdit.id, payload)} 
+            />
+          </div>
+        )}
         {loading ? (
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -574,18 +608,21 @@ function AdminDashboard() {
             <div className="text-6xl mb-4">📦</div>
             <div className="text-xl text-gray-600 mb-6">No items in catalog</div>
             <button
-              onClick={() => setShowAdd(true)}
+              onClick={() => {
+                setShowAdd(true);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
               className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 font-medium shadow-md"
             >
               Add First Item
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-6 lg:gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-8 lg:gap-12">
             {catalog.map((item) => (
               <div
                 key={item.id}
-                className="bg-white rounded-2xl shadow-lg p-4 border border-gray-100 hover:shadow-xl hover:scale-105 transition-all duration-300 flex flex-col h-full min-h-[350px]"
+                className="bg-white rounded-2xl shadow-lg p-4 border border-gray-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full min-h-[350px]"
               >
                 <div className="h-48 flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 mb-4">
                   {item.image ? (
@@ -615,7 +652,13 @@ function AdminDashboard() {
                       Sizes: {item.sizes}
                     </div>
                   )}
-                  <div className="mt-auto pt-4">
+                  <div className="mt-auto pt-4 space-y-3">
+                    <button
+                      onClick={() => setShowEdit(item)}
+                      className="px-4 py-3 bg-blue-600 text-white rounded-xl w-full hover:bg-blue-700 transition-all duration-200 font-medium shadow-md"
+                    >
+                      Edit Item
+                    </button>
                     <button
                       onClick={() => deleteItem(item.id)}
                       className="px-4 py-3 bg-red-600 text-white rounded-xl w-full hover:bg-red-700 transition-all duration-200 font-medium shadow-md"
@@ -630,9 +673,7 @@ function AdminDashboard() {
         )}
       </div>
 
-      {showAdd && (
-        <AddItemModal onClose={() => setShowAdd(false)} onSave={addItem} />
-      )}
+      
     </div>
   );
 }
@@ -660,13 +701,13 @@ function AddItemModal({ onClose, onSave }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <form
-        onSubmit={submit}
-        className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200"
-      >
+    <div className="bg-black/50 flex items-start justify-center p-4 pt-8 overflow-y-auto">
+      <div className="w-full max-w-lg mt-8">
+        <form
+          onSubmit={submit}
+          className="bg-white p-8 rounded-2xl shadow-2xl w-full border border-gray-200"
+        >
         <div className="text-center mb-8">
-          <div className="text-4xl mb-4">➕</div>
           <h3 className="font-bold text-2xl text-gray-800">Add New Item</h3>
         </div>
 
@@ -713,7 +754,90 @@ function AddItemModal({ onClose, onSave }) {
             Add Item
           </button>
         </div>
-      </form>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function EditItemModal({ item, onClose, onSave }) {
+  const [name, setName] = useState(item.name || "");
+  const [image, setImage] = useState(item.image || "");
+  const [description, setDescription] = useState(item.description || "");
+  const [sizes, setSizes] = useState(item.sizes || "");
+
+  function submit(e) {
+    e.preventDefault();
+    const payload = {
+      name,
+      image,
+      description,
+      sizes: sizes
+        ? sizes
+            .split(",")
+            .map((s) => s.trim())
+            .join(",")
+        : null,
+    };
+    onSave(payload);
+  }
+
+  return (
+    <div className="bg-black/50 flex items-start justify-center p-4 pt-8 overflow-y-auto">
+      <div className="w-full max-w-lg mt-8">
+        <form
+          onSubmit={submit}
+          className="bg-white p-8 rounded-2xl shadow-2xl w-full border border-gray-200"
+        >
+        <div className="text-center mb-8">
+          <h3 className="font-bold text-2xl text-gray-800">Edit Item</h3>
+        </div>
+
+        <div className="space-y-4">
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Item Name"
+            className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-blue-500 focus:outline-none transition-colors duration-200 text-lg"
+          />
+          <input
+            value={image}
+            onChange={(e) => setImage(e.target.value)}
+            placeholder="Image URL"
+            className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-blue-500 focus:outline-none transition-colors duration-200 text-lg"
+          />
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Description"
+            rows={3}
+            className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-blue-500 focus:outline-none transition-colors duration-200 text-lg resize-none"
+          />
+          <input
+            value={sizes}
+            onChange={(e) => setSizes(e.target.value)}
+            placeholder="Sizes (comma separated, optional)"
+            className="w-full border-2 border-gray-200 p-4 rounded-xl focus:border-blue-500 focus:outline-none transition-colors duration-200 text-lg"
+          />
+        </div>
+
+        <div className="flex justify-end gap-4 mt-8">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-6 py-3 border-2 border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium text-gray-700"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 font-medium shadow-md"
+          >
+            Update Item
+          </button>
+        </div>
+        </form>
+      </div>
     </div>
   );
 }
