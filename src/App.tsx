@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { createClient } from "@supabase/supabase-js";
 import {
@@ -20,7 +20,25 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const LS_CUSTOMER = "shop_customer";
 const LS_CART = "shop_cart";
 
-function readCustomer() {
+// Type definitions
+interface Customer {
+  name: string;
+  number: string;
+}
+
+interface Item {
+  id: string;
+  name: string;
+  image?: string;
+  description?: string;
+  sizes?: string | null;
+}
+
+interface Cart {
+  [itemId: string]: number;
+}
+
+function readCustomer(): Customer | null {
   try {
     const item = localStorage.getItem(LS_CUSTOMER);
     return item ? JSON.parse(item) : null;
@@ -28,10 +46,10 @@ function readCustomer() {
     return null;
   }
 }
-function writeCustomer(obj) {
+function writeCustomer(obj: Customer | null): void {
   localStorage.setItem(LS_CUSTOMER, JSON.stringify(obj));
 }
-function readCart() {
+function readCart(): Cart {
   try {
     const item = localStorage.getItem(LS_CART);
     return item ? JSON.parse(item) : {};
@@ -39,7 +57,7 @@ function readCart() {
     return {};
   }
 }
-function writeCart(cart) {
+function writeCart(cart: Cart): void {
   localStorage.setItem(LS_CART, JSON.stringify(cart));
 }
 
@@ -58,7 +76,7 @@ export default function App() {
   );
 }
 
-function Topbar({ cartCount, isAdminPage, customerName }) {
+function Topbar({ cartCount, isAdminPage }: { cartCount: number; isAdminPage: boolean }) {
   return (
     <div className="bg-gradient-to-r from-blue-600 to-blue-700 border-b-2 border-blue-800 sticky top-0 z-50 shadow-lg w-full">
       <div className="flex items-center justify-between w-full px-4 sm:px-6 lg:px-8 py-4 max-w-none">
@@ -138,10 +156,10 @@ function Topbar({ cartCount, isAdminPage, customerName }) {
 }
 
 function Home() {
-  const [customer, setCustomer] = useState(() => readCustomer());
-  const [catalog, setCatalog] = useState([]);
+  const [customer, setCustomer] = useState<Customer | null>(() => readCustomer());
+  const [catalog, setCatalog] = useState<Item[]>([]);
   const [loading, setLoading] = useState(false);
-  const [cart, setCart] = useState(() => readCart());
+  const [cart, setCart] = useState<Cart>(() => readCart());
 
   useEffect(() => {
     fetchCatalog();
@@ -162,20 +180,20 @@ function Home() {
     setCatalog(data || []);
   }
 
-  function handleSetCustomer(name, number) {
+  function handleSetCustomer(name: string, number: string) {
     const obj = { name, number };
     setCustomer(obj);
     writeCustomer(obj);
   }
 
-  function addToCart(itemId) {
+  function addToCart(itemId: string) {
     setCart((prev) => {
       const next = { ...prev };
       next[itemId] = (next[itemId] || 0) + 1;
       return next;
     });
   }
-  function removeFromCart(itemId) {
+  function removeFromCart(itemId: string) {
     setCart((prev) => {
       const next = { ...prev };
       if (!next[itemId]) return prev;
@@ -184,7 +202,7 @@ function Home() {
       return next;
     });
   }
-  function setQuantity(itemId, q) {
+  function setQuantity(itemId: string, q: number) {
     setCart((prev) => {
       const next = { ...prev };
       if (q <= 0) {
@@ -200,7 +218,7 @@ function Home() {
 
   return (
     <div className="w-full min-h-screen bg-gray-50">
-      <Topbar cartCount={cartCount} customerName={customer?.name} isAdminPage={false} />
+      <Topbar cartCount={cartCount} isAdminPage={false} />
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         {!customer ? (
           <div className="max-w-4xl mx-auto">
@@ -253,7 +271,7 @@ function Home() {
   );
 }
 
-function CustomerForm({ onSave }) {
+function CustomerForm({ onSave }: { onSave: (name: string, number: string) => void }) {
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
   return (
@@ -286,7 +304,13 @@ function CustomerForm({ onSave }) {
   );
 }
 
-function ItemCardCustomer({ item, quantity, onAdd, onRemove, onSetQuantity }) {
+function ItemCardCustomer({ item, quantity, onAdd, onRemove }: { 
+  item: Item; 
+  quantity: number; 
+  onAdd: () => void; 
+  onRemove: () => void; 
+  onSetQuantity: (q: number) => void; 
+}) {
   return (
     <div className="bg-white rounded-2xl shadow-lg p-4 border border-gray-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full min-h-[350px]">
       <div className="h-48 flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 mb-4">
@@ -339,21 +363,21 @@ function ItemCardCustomer({ item, quantity, onAdd, onRemove, onSetQuantity }) {
 
 function CartPage() {
   const navigate = useNavigate();
-  const [cart, setCart] = useState(() => readCart());
-  const [catalogMap, setCatalogMap] = useState({});
+  const [cart, setCart] = useState<Cart>(() => readCart());
+  const [catalogMap, setCatalogMap] = useState<{ [key: string]: Item }>({});
 
   useEffect(() => {
     (async () => {
       const ids = Object.keys(cart);
       if (ids.length === 0) return;
       const { data } = await supabase.from("items").select("*").in("id", ids);
-      const map = {};
-      (data || []).forEach((i) => (map[i.id] = i));
+      const map: { [key: string]: Item } = {};
+      (data || []).forEach((i: Item) => (map[i.id] = i));
       setCatalogMap(map);
     })();
   }, []);
 
-  function updateQty(itemId, qty) {
+  function updateQty(itemId: string, qty: number) {
     const next = { ...cart };
     if (qty <= 0) delete next[itemId];
     else next[itemId] = qty;
@@ -369,7 +393,7 @@ function CartPage() {
 
   return (
     <div className="w-full min-h-screen bg-gray-50">
-      <Topbar cartCount={Object.values(cart).reduce((s: number, v: any) => s + (v as number), 0)} customerName={undefined} isAdminPage={false} />
+      <Topbar cartCount={Object.values(cart).reduce((s: number, v: any) => s + (v as number), 0)} isAdminPage={false} />
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Your Shopping Cart</h2>
@@ -450,10 +474,10 @@ function CartPage() {
 function AdminLogin() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  async function submit(e) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     const { data, error } = await supabase
@@ -510,10 +534,10 @@ function AdminLogin() {
 
 function AdminDashboard() {
   const navigate = useNavigate();
-  const [catalog, setCatalog] = useState([]);
+  const [catalog, setCatalog] = useState<Item[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
-  const [showEdit, setShowEdit] = useState(null);
+  const [showEdit, setShowEdit] = useState<Item | null>(null);
 
   useEffect(() => {
     const isAdmin = localStorage.getItem("is_admin");
@@ -540,7 +564,7 @@ function AdminDashboard() {
     setCatalog(data || []);
   }
 
-  async function deleteItem(id) {
+  async function deleteItem(id: string) {
     if (!confirm("Delete this item?")) return;
     const { error } = await supabase.from("items").delete().eq("id", id);
     if (error) {
@@ -550,7 +574,7 @@ function AdminDashboard() {
     setCatalog(catalog.filter((c) => c.id !== id));
   }
 
-  async function addItem(payload) {
+  async function addItem(payload: Omit<Item, 'id'>) {
     const { data, error } = await supabase
       .from("items")
       .insert([payload])
@@ -564,7 +588,7 @@ function AdminDashboard() {
     setShowAdd(false);
   }
 
-  async function updateItem(id, payload) {
+  async function updateItem(id: string, payload: Omit<Item, 'id'>) {
     const { data, error } = await supabase
       .from("items")
       .update(payload)
@@ -581,7 +605,7 @@ function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 w-full">
-      <Topbar cartCount={0} isAdminPage={true} customerName={undefined} />
+      <Topbar cartCount={0} isAdminPage={true} />
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Admin - Catalog Management</h2>
         {showAdd && (
@@ -678,13 +702,13 @@ function AdminDashboard() {
   );
 }
 
-function AddItemModal({ onClose, onSave }) {
+function AddItemModal({ onClose, onSave }: { onClose: () => void; onSave: (payload: Omit<Item, 'id'>) => void }) {
   const [name, setName] = useState("");
   const [image, setImage] = useState("");
   const [description, setDescription] = useState("");
   const [sizes, setSizes] = useState("");
 
-  function submit(e) {
+  function submit(e: React.FormEvent) {
     e.preventDefault();
     const payload = {
       name,
@@ -693,7 +717,7 @@ function AddItemModal({ onClose, onSave }) {
       sizes: sizes
         ? sizes
             .split(",")
-            .map((s) => s.trim())
+            .map((s: string) => s.trim())
             .join(",")
         : null,
     };
@@ -760,13 +784,13 @@ function AddItemModal({ onClose, onSave }) {
   );
 }
 
-function EditItemModal({ item, onClose, onSave }) {
+function EditItemModal({ item, onClose, onSave }: { item: Item; onClose: () => void; onSave: (payload: Omit<Item, 'id'>) => void }) {
   const [name, setName] = useState(item.name || "");
   const [image, setImage] = useState(item.image || "");
   const [description, setDescription] = useState(item.description || "");
   const [sizes, setSizes] = useState(item.sizes || "");
 
-  function submit(e) {
+  function submit(e: React.FormEvent) {
     e.preventDefault();
     const payload = {
       name,
@@ -775,7 +799,7 @@ function EditItemModal({ item, onClose, onSave }) {
       sizes: sizes
         ? sizes
             .split(",")
-            .map((s) => s.trim())
+            .map((s: string) => s.trim())
             .join(",")
         : null,
     };
